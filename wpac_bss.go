@@ -14,9 +14,10 @@ type BSSWPA struct {
 }
 
 type BSSWPA2 struct {
-	KeyMgmt  []string `json:"key_mgmt"`
-	PairWise []string `json:"pairwise"`
-	Group    string   `json:"group"`
+	KeyMgmt   []string `json:"key_mgmt"`
+	PairWise  []string `json:"pairwise"`
+	Group     string   `json:"group"`
+	MgmtGroup string   `json:"mgmt_group"` // Management group (RSN only)
 }
 
 // WPABSS ...
@@ -65,7 +66,8 @@ func (wb *WPABSS) readWPA() error {
 					wb.WPA.Group = variant.Value().(string)
 				}
 			}
-			if len(wb.WPA.KeyMgmt) == 0 {
+			// ref: wpas_dbus_bss_properties
+			if len(wb.WPA.KeyMgmt) == 0 && len(wb.WPA.PairWise) == 0 {
 				wb.WPA = nil
 			}
 		}
@@ -87,9 +89,11 @@ func (wb *WPABSS) readRSN() error {
 				wb.WPA2.PairWise = variant.Value().([]string)
 			case "Group":
 				wb.WPA2.Group = variant.Value().(string)
+			case "MgmtGroup":
+				wb.WPA2.MgmtGroup = variant.Value().(string)
 			}
 		}
-		if len(wb.WPA2.KeyMgmt) == 0 {
+		if len(wb.WPA2.KeyMgmt) == 0 && len(wb.WPA2.PairWise) == 0 {
 			wb.WPA2 = nil
 		}
 	}
