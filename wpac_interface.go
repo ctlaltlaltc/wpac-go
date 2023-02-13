@@ -289,6 +289,17 @@ func (self *WPAInterface) GetCurrentBSS() WPABSS {
 	return NewBSS(self.bus, bss)
 }
 
+func (self *WPAInterface) FlushBSS(age uint32) error {
+	var t string = "u"
+	args := dbus.MakeVariantWithSignature(age, dbus.Signature{t})
+	obj := self.bus.Connection.Object("fi.w1.wpa_supplicant1", self.ifacePath)
+	call := obj.Call("fi.w1.wpa_supplicant1.Interface.FlushBSS", 0, args)
+	if call.Err != nil {
+		return call.Err
+	}
+	return nil
+}
+
 func (self *WPAInterface) GetCurrentNetwork() WPANetwork {
 	obj := self.bus.Connection.Object("fi.w1.wpa_supplicant1", self.ifacePath)
 	iface, _ := obj.GetProperty("fi.w1.wpa_supplicant1.Interface.CurrentNetwork")
