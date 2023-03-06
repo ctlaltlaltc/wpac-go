@@ -136,7 +136,7 @@ func (self *WPAInterface) GetBSSList() []WPABSS {
 	obj := self.bus.Connection.Object("fi.w1.wpa_supplicant1", self.ifacePath)
 	bsss, err := obj.GetProperty("fi.w1.wpa_supplicant1.Interface.BSSs")
 	if err == nil {
-		re := regexp.MustCompile(`^[\w\s_.-]*$`)
+		re := regexp.MustCompile(`^[\p{L}\d\s_.-]*$`)
 		for _, bssObjectPath := range bsss.Value().([]dbus.ObjectPath) {
 			bss := NewBSS(self.bus, bssObjectPath)
 			if re.MatchString(bss.SSID) && bss.SSID != "" {
@@ -287,17 +287,6 @@ func (self *WPAInterface) GetCurrentBSS() WPABSS {
 	iface, _ := obj.GetProperty("fi.w1.wpa_supplicant1.Interface.CurrentBSS")
 	bss := iface.Value().(dbus.ObjectPath)
 	return NewBSS(self.bus, bss)
-}
-
-func (self *WPAInterface) FlushBSS(age uint32) error {
-	var t string = "u"
-	args := dbus.MakeVariantWithSignature(age, dbus.Signature{t})
-	obj := self.bus.Connection.Object("fi.w1.wpa_supplicant1", self.ifacePath)
-	call := obj.Call("fi.w1.wpa_supplicant1.Interface.FlushBSS", 0, args)
-	if call.Err != nil {
-		return call.Err
-	}
-	return nil
 }
 
 func (self *WPAInterface) GetCurrentNetwork() WPANetwork {
